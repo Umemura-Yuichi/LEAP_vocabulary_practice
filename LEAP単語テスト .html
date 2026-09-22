@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>LEAP Basic 英単語クイズ</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #1e293b;
+      --text-sub: #64748b;
+      --correct: #16a34a;
+      --wrong: #dc2626;
+      --border: #e2e8f0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 650px;
+      background: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      padding: 24px;
+      border: 1px solid var(--border);
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      text-align: center;
+      margin-bottom: 20px;
+      color: var(--primary);
+    }
+
+    .select-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: bold;
+      margin-bottom: 6px;
+      color: var(--text-sub);
+    }
+
+    select {
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background-color: #fff;
+      color: var(--text-main);
+      outline: none;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #fff;
+      background-color: var(--primary);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background-color 0.2s;
+    }
+
+    .btn:active {
+      background-color: var(--primary-hover);
+    }
+
+    .quiz-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 1rem;
+      font-weight: bold;
+    }
+
+    .timer-box {
+      color: var(--wrong);
+      font-size: 1.2rem;
+    }
+
+    .score-box {
+      color: var(--primary);
+    }
+
+    .combo-box {
+      color: #d97706;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 8px;
+      background-color: #e2e8f0;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background-color: var(--primary);
+      width: 100%;
+      transition: width 1s linear;
+    }
+
+    .word-card {
+      text-align: center;
+      padding: 30px 10px;
+      background: #f1f5f9;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+
+    .word-num {
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      margin-bottom: 4px;
+    }
+
+    .word-text {
+      font-size: 2rem;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+      word-break: break-word;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .option-btn {
+      padding: 16px;
+      font-size: 1.05rem;
+      text-align: left;
+      background: #fff;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.15s;
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    .option-btn:active {
+      background-color: #f8fafc;
+    }
+
+    .option-btn.correct {
+      background-color: #dcfce7 !important;
+      border-color: var(--correct) !important;
+      color: var(--correct) !important;
+    }
+
+    .option-btn.wrong {
+      background-color: #fee2e2 !important;
+      border-color: var(--wrong) !important;
+      color: var(--wrong) !important;
+    }
+
+    .result-summary {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .result-score {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: var(--primary);
+      margin: 10px 0;
+    }
+
+    .result-stats {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 20px;
+      background: #f1f5f9;
+      padding: 12px;
+      border-radius: 8px;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-sub);
+    }
+
+    .review-list {
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .review-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 0.9rem;
+    }
+
+    .review-item:last-child {
+      border-bottom: none;
+    }
+
+    .review-word {
+      font-weight: bold;
+    }
+
+    .review-meaning {
+      color: var(--text-sub);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- 1. 設定・スタート画面 -->
+  <div id="start-screen">
+    <h1>LEAP Basic 単語テスト</h1>
+
+    <div class="select-group">
+      <label for="mode-select">出題モードの選択</label>
+      <select id="mode-select">
+        <option value="eng_to_jap">英語 → 日本語（英単語を見て日本語訳を選ぶ）</option>
+        <option value="jap_to_eng">日本語 → 英語（日本語訳を見て英単語を選ぶ）</option>
+      </select>
+    </div>
+    
+    <div class="select-group">
+      <label for="part-select">Partの選択</label>
+      <select id="part-select">
+        <!-- JSで動的生成 -->
+      </select>
+    </div>
+
+    <div class="select-group">
+      <label for="week-select">Weekの選択</label>
+      <select id="week-select">
+        <!-- JSで動的生成 -->
+      </select>
+    </div>
+
+    <button class="btn" id="start-btn">テスト開始 (60秒)</button>
+  </div>
+
+  <!-- 2. クイズ画面 -->
+  <div id="quiz-screen" class="hidden">
+    <div class="quiz-header">
+      <div class="timer-box">⏱ <span id="timer">60</span>s</div>
+      <div class="combo-box"><span id="combo">0</span> Combo</div>
+      <div class="score-box"><span id="score">0</span> pt</div>
+    </div>
+    
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="timer-bar"></div>
+    </div>
+
+    <div class="word-card">
+      <div class="word-num" id="word-num">No. ---</div>
+      <div class="word-text" id="word-text">word</div>
+    </div>
+
+    <div class="options-grid" id="options-container">
+      <!-- 選択肢ボタン4つ -->
+    </div>
+  </div>
+
+  <!-- 3. 結果画面 -->
+  <div id="result-screen" class="hidden">
+    <h1>タイムアップ！</h1>
+    
+    <div class="result-summary">
+      <div>スコア</div>
+      <div class="result-score" id="final-score">0</div>
+    </div>
+
+    <div class="result-stats">
+      <div class="stat-item">
+        <div class="stat-value" id="stat-correct">0 / 0</div>
+        <div class="stat-label">正答数 / 解答数</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="stat-accuracy">0%</div>
+        <div class="stat-label">正答率</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="stat-maxcombo">0</div>
+        <div class="stat-label">最大コンボ</div>
+      </div>
+    </div>
+
+    <div id="review-container" class="hidden">
+      <label>要復習単語（間違えた問題）</label>
+      <div class="review-list" id="review-list"></div>
+    </div>
+
+    <button class="btn" id="restart-btn">もう一度挑戦する</button>
+  </div>
+</div>
+
+<script>
+// --- 正しい全単語データ構造 ---
+// [No, English, Japanese, Part, Week]
+const rawVocabularyData = [
+  // Part 1 - Week 1
+  [1, "a", "１つの、ある", "Part 1", "Week 1"],
+  [2, "the", "その、例の", "Part 1", "Week 1"],
+  [3, "something", "何か", "Part 1", "Week 1"],
+  [4, "someone", "誰か", "Part 1", "Week 1"],
+  [5, "oneself", "自分自身", "Part 1", "Week 1"],
+  [6, "speak", "話す、喋る", "Part 1", "Week 1"],
+  [7, "talk", "話し合う、語る", "Part 1", "Week 1"],
+  [8, "say", "～と言う", "Part 1", "Week 1"],
+  [9, "tell （人） about ～", "（人）に～について話す", "Part 1", "Week 1"],
+  [10, "tell （人） （that） S V", "（人）に…だと伝える", "Part 1", "Week 1"],
+  [11, "look at ～", "～を見る", "Part 1", "Week 1"],
+  [12, "see", "～が見える、会う", "Part 1", "Week 1"],
+  [13, "watch", "～をじっと見る", "Part 1", "Week 1"],
+  [14, "listen to ～", "～を聴く", "Part 1", "Week 1"],
+  [15, "hear", "～が聞こえる", "Part 1", "Week 1"],
+  [16, "language", "言語、言葉", "Part 1", "Week 1"],
+  [17, "news", "ニュース、知らせ", "Part 1", "Week 1"],
+  [18, "movie", "映画", "Part 1", "Week 1"],
+  [19, "information", "情報", "Part 1", "Week 1"],
+  [20, "opinion", "意見", "Part 1", "Week 1"],
+  [21, "answer", "答え、～に答える", "Part 1", "Week 1"],
+  [22, "write", "（文字・文）を書く", "Part 1", "Week 1"],
+  [23, "read", "（本など）を読む", "Part 1", "Week 1"],
+  [24, "take a picture （of ～）", "（～の）写真を撮る", "Part 1", "Week 1"],
+  [25, "hear from ～", "～から連絡をもらう", "Part 1", "Week 1"],
+  [26, "get in touch with ～", "～と連絡を取る", "Part 1", "Week 1"],
+  [27, "meet", "～と会う、出会う", "Part 1", "Week 1"],
+  [28, "introduce", "～を紹介する", "Part 1", "Week 1"],
+  [29, "invite", "～を招待する", "Part 1", "Week 1"],
+  [30, "join", "～に加わる、参加する", "Part 1", "Week 1"],
+  [31, "take part （in ～）", "（～に）参加する", "Part 1", "Week 1"],
+  [32, "look like ～", "～のように見える", "Part 1", "Week 1"],
+  [33, "sound like ～", "～のように聞こえる", "Part 1", "Week 1"],
+  [34, "A such as B", "BのようなA", "Part 1", "Week 1"],
+  [35, "feel", "～と感じる", "Part 1", "Week 1"],
+  [36, "think （that） S V", "…だと思う", "Part 1", "Week 1"],
+  [37, "think about ～", "～について考える", "Part 1", "Week 1"],
+  [38, "know （程度） about ～", "～について…知っている", "Part 1", "Week 1"],
+  [39, "learn", "～を学ぶ、知る", "Part 1", "Week 1"],
+  [40, "study", "～を勉強する", "Part 1", "Week 1"],
+
+  // Part 1 - Week 2
+  [41, "find", "～を見つける、知る", "Part 1", "Week 2"],
+  [42, "understand", "～を理解する", "Part 1", "Week 2"],
+  [43, "remember", "～を覚えている、思い出す", "Part 1", "Week 2"],
+  [44, "forget", "～を忘れる", "Part 1", "Week 2"],
+  [45, "care", "気にする、世話をする", "Part 1", "Week 2"],
+  [46, "have no idea", "全くわからない", "Part 1", "Week 2"],
+  [47, "come up with ～", "～を思いつく", "Part 1", "Week 2"],
+  [48, "memory", "記憶、思い出", "Part 1", "Week 2"],
+  [49, "believe （that） S V", "…だと信じる", "Part 1", "Week 2"],
+  [50, "believe in ～", "～（の存在など）を信じる", "Part 1", "Week 2"],
+  [51, "I am sure （that） S V", "…だと確信している", "Part 1", "Week 2"],
+  [52, "see if S V", "…かどうか確かめる", "Part 1", "Week 2"],
+  [53, "show", "～を見せる、示す", "Part 1", "Week 2"],
+  [54, "mean", "～を意味する", "Part 1", "Week 2"],
+  [55, "run", "走る、～を経営する", "Part 1", "Week 2"],
+  [56, "sit", "座る", "Part 1", "Week 2"],
+  [57, "stand", "立つ、～に耐える", "Part 1", "Week 2"],
+  [58, "sleep", "眠る", "Part 1", "Week 2"],
+  [59, "hold", "～を手に持つ、催す", "Part 1", "Week 2"],
+  [60, "push", "～を押す", "Part 1", "Week 2"],
+  [61, "climb", "（山など）に登る", "Part 1", "Week 2"],
+  [62, "go up", "上がる、登る", "Part 1", "Week 2"],
+  [63, "go to ～", "～へ行く", "Part 1", "Week 2"],
+  [64, "come to ～", "～へ来る", "Part 1", "Week 2"],
+  [65, "visit", "～を訪問する", "Part 1", "Week 2"],
+  [66, "move", "動く、～を引っ越す", "Part 1", "Week 2"],
+  [67, "return", "戻る、～を返す", "Part 1", "Week 2"],
+  [68, "travel", "旅行する", "Part 1", "Week 2"],
+  [69, "enter", "～に入る", "Part 1", "Week 2"],
+  [70, "toward", "～の方へ", "Part 1", "Week 2"],
+  [71, "go to bed", "寝る", "Part 1", "Week 2"],
+  [72, "go to school", "学校へ通う", "Part 1", "Week 2"],
+  [73, "go to work", "仕事に行く", "Part 1", "Week 2"],
+  [74, "go shopping", "買い物に行く", "Part 1", "Week 2"],
+  [75, "go out", "外出する", "Part 1", "Week 2"],
+  [76, "eat out", "外食する", "Part 1", "Week 2"],
+  [77, "leave", "～を去る、残す", "Part 1", "Week 2"],
+  [78, "get to ～", "～に到着する", "Part 1", "Week 2"],
+  [79, "arrive at ～", "～に到着する", "Part 1", "Week 2"],
+  [80, "ride", "（車など）に乗る", "Part 1", "Week 2"],
+  [81, "get on ～", "（電車など）に乗る", "Part 1", "Week 2"],
+
+  // Part 1 - Week 3
+  [82, "get into ～", "（車など）に入る・乗る", "Part 1", "Week 3"],
+  [83, "take the train （to ～）", "（～まで）電車で行く", "Part 1", "Week 3"],
+  [84, "fly", "飛ぶ、飛行機で行く", "Part 1", "Week 3"],
+  [85, "park", "～を駐車する", "Part 1", "Week 3"],
+  [86, "take A to B", "AをBへ持っていく/連れていく", "Part 1", "Week 3"],
+  [87, "bring A to B", "AをBへ持ってくる/連れてくる", "Part 1", "Week 3"],
+  [88, "carry", "～を運ぶ、持ち歩く", "Part 1", "Week 3"],
+  [89, "pick ～ up", "～を拾い上げる、車で迎える", "Part 1", "Week 3"],
+  [90, "get", "～を得る、受け取る", "Part 1", "Week 3"],
+  [91, "take", "～を取る、連れて行く", "Part 1", "Week 3"],
+  [92, "catch", "～をつかまえる、間に合う", "Part 1", "Week 3"],
+  [93, "receive", "～を受け取る", "Part 1", "Week 3"],
+  [94, "give", "～を与える、あげる", "Part 1", "Week 3"],
+  [95, "send", "～を送る", "Part 1", "Week 3"],
+  [96, "hand ～ in", "～を提出する", "Part 1", "Week 3"],
+  [97, "hand ～ out", "～を配る", "Part 1", "Week 3"],
+  [98, "steal A from B", "BからAを盗む", "Part 1", "Week 3"],
+  [99, "keep", "～を保つ、持ち続ける", "Part 1", "Week 3"],
+  [100, "own", "～を所有している", "Part 1", "Week 3"],
+  [101, "look for ～", "～を探す", "Part 1", "Week 3"],
+  [102, "look ～ up", "（辞書などで）～を調べる", "Part 1", "Week 3"],
+  [103, "there is［are］ ～", "～がある、いる", "Part 1", "Week 3"],
+  [104, "happen", "起こる", "Part 1", "Week 3"],
+  [105, "appear", "現れる、～のように見える", "Part 1", "Week 3"],
+  [106, "show up", "姿を現す、やって来る", "Part 1", "Week 3"],
+  [107, "come true", "（夢などが）実現する", "Part 1", "Week 3"],
+  [108, "break out", "（戦争・火事などが）勃発する", "Part 1", "Week 3"],
+  [109, "have an accident", "事故に遭う", "Part 1", "Week 3"],
+  [110, "continue", "続く、～を続ける", "Part 1", "Week 3"],
+  [111, "keep on doing", "～し続ける", "Part 1", "Week 3"],
+  [112, "stop doing", "～するのをやめる", "Part 1", "Week 3"],
+  [113, "give ～ up", "～を諦める、やめる", "Part 1", "Week 3"],
+  [114, "home", "家庭、家", "Part 1", "Week 3"],
+  [115, "floor", "床、階", "Part 1", "Week 3"],
+  [116, "live", "住む、生きる", "Part 1", "Week 3"],
+  [117, "stay", "滞在する、～のままでいる", "Part 1", "Week 3"],
+  [118, "stay with （人）", "（人）の家に泊まる", "Part 1", "Week 3"],
+  [119, "stay up", "夜ふかしする", "Part 1", "Week 3"],
+  [120, "take a bath", "入浴する", "Part 1", "Week 3"],
+  [121, "have ～ for breakfast", "朝食に～を食べる", "Part 1", "Week 3"],
+  [122, "call", "～を呼ぶ、電話する", "Part 1", "Week 3"],
+
+  // Part 1 - Week 4
+  [123, "turn ～ on", "（電気・テレビなど）をつける", "Part 1", "Week 4"],
+  [124, "clean", "～を掃除する、きれいな", "Part 1", "Week 4"],
+  [125, "brush", "～にブラシをかける、みがく", "Part 1", "Week 4"],
+  [126, "put ～ away", "～を片付ける", "Part 1", "Week 4"],
+  [127, "throw ～ away", "～を投げ捨てる", "Part 1", "Week 4"],
+  [128, "clothes", "服、衣類", "Part 1", "Week 4"],
+  [129, "wear", "～を着ている、身につけている", "Part 1", "Week 4"],
+  [130, "put ～ on", "～を着る、身につける", "Part 1", "Week 4"],
+  [131, "take ～ off", "～を脱ぐ", "Part 1", "Week 4"],
+  [132, "get dressed", "服を着る", "Part 1", "Week 4"],
+  [133, "put", "～を置く、入れる", "Part 1", "Week 4"],
+  [134, "set", "～を置く、設定する", "Part 1", "Week 4"],
+  [135, "close", "～を閉じる、閉まる", "Part 1", "Week 4"],
+  [136, "hit", "～を打つ、叩く", "Part 1", "Week 4"],
+  [137, "turn ～ over", "～をひっくり返す", "Part 1", "Week 4"],
+  [138, "build", "～を建てる、築く", "Part 1", "Week 4"],
+  [139, "be made of ～", "～（原料）で作られている", "Part 1", "Week 4"],
+  [140, "put ～ together", "～を組み立てる、まとめる", "Part 1", "Week 4"],
+  [141, "want to do", "～したい", "Part 1", "Week 4"],
+  [142, "would like to do", "～したい（丁寧な表現）", "Part 1", "Week 4"],
+  [143, "feel like doing", "～したい気がする", "Part 1", "Week 4"],
+  [144, "enjoy", "～を楽しむ", "Part 1", "Week 4"],
+  [145, "have fun", "楽しむ", "Part 1", "Week 4"],
+  [146, "be glad to do", "～して嬉しい", "Part 1", "Week 4"],
+  [147, "be interested in ～", "～に興味がある", "Part 1", "Week 4"],
+  [148, "look forward to ～", "～を心待ちにする", "Part 1", "Week 4"],
+  [149, "laugh at ～", "～を見て笑う", "Part 1", "Week 4"],
+  [150, "favorite", "大好きな、お気に入りの", "Part 1", "Week 4"],
+  [151, "tell （人） to do", "（人）に～するよう言う", "Part 1", "Week 4"],
+  [152, "ask （人） to do", "（人）に～するよう頼む", "Part 1", "Week 4"],
+  [153, "would like （人） to do", "（人）に～してもらいたい", "Part 1", "Week 4"],
+  [154, "advise （人） to do", "（人）に～するよう忠告する", "Part 1", "Week 4"],
+  [155, "happy", "幸せな、嬉しい", "Part 1", "Week 4"],
+  [156, "sad", "悲しい", "Part 1", "Week 4"],
+  [157, "afraid", "恐れて、心配して", "Part 1", "Week 4"],
+  [158, "sorry", "気の毒で、申し訳なく思って", "Part 1", "Week 4"],
+  [159, "angry", "怒って", "Part 1", "Week 4"],
+  [160, "cry", "泣く、叫ぶ", "Part 1", "Week 4"],
+  [161, "worry", "心配する", "Part 1", "Week 4"],
+  [162, "be surprised at ～", "～に驚く", "Part 1", "Week 4"],
+  [163, "be proud of ～", "～を誇りに思う", "Part 1", "Week 4"],
+
+  // Part 1 - Week 5
+  [164, "life", "生活、人生、生命", "Part 1", "Week 5"],
+  [165, "dream", "夢", "Part 1", "Week 5"],
+  [166, "get married (to ～)", "（～と）結婚する", "Part 1", "Week 5"],
+  [167, "be born", "生まれる", "Part 1", "Week 5"],
+  [168, "die", "死ぬ", "Part 1", "Week 5"],
+  [169, "win", "（レースなど）に勝つ、得る", "Part 1", "Week 5"],
+  [170, "lose", "～を失う、負ける", "Part 1", "Week 5"],
+  [171, "health", "健康", "Part 1", "Week 5"],
+  [172, "get sick", "病気になる", "Part 1", "Week 5"],
+  [173, "get well", "（病気から）回復する", "Part 1", "Week 5"],
+  [174, "stay healthy", "健康を保つ", "Part 1", "Week 5"],
+  [175, "have a cold", "風邪をひいている", "Part 1", "Week 5"],
+  [176, "human", "人間、人類", "Part 1", "Week 5"],
+  [177, "person", "人、個人", "Part 1", "Week 5"],
+  [178, "people", "人々", "Part 1", "Week 5"],
+  [179, "neighbor", "近所の人、隣人", "Part 1", "Week 5"],
+  [180, "help", "～を手伝う、助ける", "Part 1", "Week 5"],
+  [181, "grow", "成長する、育てる", "Part 1", "Week 5"],
+  [182, "bring ～ up", "（子供など）を育てる", "Part 1", "Week 5"],
+  [183, "take care of ～", "～の世話をする", "Part 1", "Week 5"],
+  [184, "get along with ～", "～と仲良くやる", "Part 1", "Week 5"],
+  [185, "make friends （with ～）", "（～と）友達になる", "Part 1", "Week 5"],
+  [186, "a friend from ～", "～からの友達", "Part 1", "Week 5"],
+  [187, "break up （with ～）", "（～と）別れる", "Part 1", "Week 5"],
+  [188, "pay", "（代金）を支払う", "Part 1", "Week 5"],
+  [189, "buy", "～を買う", "Part 1", "Week 5"],
+  [190, "sell", "～を売る", "Part 1", "Week 5"],
+  [191, "expensive", "高額な、高価な", "Part 1", "Week 5"],
+  [192, "cheap", "安価な、安い", "Part 1", "Week 5"],
+  [193, "on sale", "売り出されて、特売で", "Part 1", "Week 5"],
+  [194, "job", "職業、仕事", "Part 1", "Week 5"],
+  [195, "work", "働く、仕事", "Part 1", "Week 5"],
+  [196, "report", "報告書、レポート", "Part 1", "Week 5"],
+  [197, "work for ～", "～に勤めている", "Part 1", "Week 5"],
+  [198, "vacation", "休暇", "Part 1", "Week 5"],
+  [199, "take （期間） off", "（期間の）休みを取る", "Part 1", "Week 5"],
+  [200, "on business", "仕事で、出張で", "Part 1", "Week 5"],
+  [201, "class", "授業、クラス", "Part 1", "Week 5"],
+  [202, "homework", "宿題", "Part 1", "Week 5"],
+  [203, "paper", "紙、論文、レポート", "Part 1", "Week 5"],
+  [204, "interview", "面接、インタビュー", "Part 1", "Week 5"],
+
+  // Part 1 - Week 6
+  [205, "teach", "～を教える", "Part 1", "Week 6"],
+  [206, "on my way to school", "通学の途中で", "Part 1", "Week 6"],
+  [207, "on a school trip", "修学旅行で", "Part 1", "Week 6"],
+  [208, "foreign", "外国の", "Part 1", "Week 6"],
+  [209, "abroad", "外国へ、海外で", "Part 1", "Week 6"],
+  [210, "international", "国際的な", "Part 1", "Week 6"],
+  [211, "country", "国、田舎", "Part 1", "Week 6"],
+  [212, "town", "町", "Part 1", "Week 6"],
+  [213, "street", "通り、街路", "Part 1", "Week 6"],
+  [214, "begin", "始まる、～を始める", "Part 1", "Week 6"],
+  [215, "finish", "～を終える、終わる", "Part 1", "Week 6"],
+  [216, "be over", "（会議などが）終わる", "Part 1", "Week 6"],
+  [217, "be done with ～", "～を終えている", "Part 1", "Week 6"],
+  [218, "become", "～になる", "Part 1", "Week 6"],
+  [219, "turn", "（色などが）変わる、回る", "Part 1", "Week 6"],
+  [220, "change", "～を変える、変わる", "Part 1", "Week 6"],
+  [221, "learn to do", "～できるようになる", "Part 1", "Week 6"],
+  [222, "come to do", "～するようになる", "Part 1", "Week 6"],
+  [223, "get used to ～", "～に慣れる", "Part 1", "Week 6"],
+  [224, "go bad", "（食べ物などが）傷む", "Part 1", "Week 6"],
+  [225, "problem", "問題", "Part 1", "Week 6"],
+  [226, "solve", "（問題）を解決する", "Part 1", "Week 6"],
+  [227, "do well", "上手くやる、成果をあげる", "Part 1", "Week 6"],
+  [228, "decide", "～を決める", "Part 1", "Week 6"],
+  [229, "choose", "～を選ぶ", "Part 1", "Week 6"],
+  [230, "break", "～を壊す、壊れる", "Part 1", "Week 6"],
+  [231, "break down", "（機械が）故障する", "Part 1", "Week 6"],
+  [232, "fall", "落ちる、転ぶ", "Part 1", "Week 6"],
+  [233, "drop", "～を落とす、落ちる", "Part 1", "Week 6"],
+  [234, "busy", "忙しい", "Part 1", "Week 6"],
+  [235, "free", "自由な、暇な、無料の", "Part 1", "Week 6"],
+  [236, "careful", "注意深い", "Part 1", "Week 6"],
+  [237, "kind", "親切な、種類", "Part 1", "Week 6"],
+  [238, "poor", "貧しい、下手な", "Part 1", "Week 6"],
+  [239, "shy", "内気な、恥ずかしがり屋の", "Part 1", "Week 6"],
+  [240, "be good at ～", "～が得意である", "Part 1", "Week 6"],
+  [241, "be able to do", "～することができる", "Part 1", "Week 6"],
+  [242, "be tired from ～", "～で疲れている", "Part 1", "Week 6"],
+  [243, "easy", "簡単な、易しい", "Part 1", "Week 6"],
+  [244, "difficult", "難しい", "Part 1", "Week 6"],
+
+  // Part 1 - Week 7
+  [245, "quiet", "静かな", "Part 1", "Week 7"],
+  [246, "safe", "安全な", "Part 1", "Week 7"],
+  [247, "true", "本当の、真実の", "Part 1", "Week 7"],
+  [248, "wrong", "間違った", "Part 1", "Week 7"],
+  [249, "different", "違った、異なる", "Part 1", "Week 7"],
+  [250, "be covered with ～", "～で覆われている", "Part 1", "Week 7"],
+  [251, "be full of ～", "～で満ちている", "Part 1", "Week 7"],
+  [252, "important", "重要な", "Part 1", "Week 7"],
+  [253, "necessary", "必要な", "Part 1", "Week 7"],
+  [254, "large", "大きい、広い", "Part 1", "Week 7"],
+  [255, "small", "小さい", "Part 1", "Week 7"],
+  [256, "tall", "背が高い", "Part 1", "Week 7"],
+  [257, "short", "背が低い、短い", "Part 1", "Week 7"],
+  [258, "only", "唯一の、単に～だけ", "Part 1", "Week 7"],
+  [259, "even", "～でさえ", "Part 1", "Week 7"],
+  [260, "each", "各自の、それぞれの", "Part 1", "Week 7"],
+  [261, "other", "ほかの、もう一方の", "Part 1", "Week 7"],
+  [262, "another", "もう1つの", "Part 1", "Week 7"],
+  [263, "each other", "お互い", "Part 1", "Week 7"],
+  [264, "either A or B", "AかBのどちらか", "Part 1", "Week 7"],
+  [265, "neither A nor B", "AもBも～ない", "Part 1", "Week 7"],
+  [266, "both A and B", "AもBも両方とも", "Part 1", "Week 7"],
+  [267, "not A but B", "AではなくB", "Part 1", "Week 7"],
+  [268, "not only A but （also） B", "AだけでなくBも", "Part 1", "Week 7"],
+  [269, "at least", "少なくとも", "Part 1", "Week 7"],
+  [270, "the same ～", "同じ～", "Part 1", "Week 7"],
+  [271, "especially", "特に", "Part 1", "Week 7"],
+  [272, "have （程度） to do with ～", "～と（程度）関係がある", "Part 1", "Week 7"],
+  [273, "that of ～", "～のそれ（指し示す代名詞）", "Part 1", "Week 7"],
+  [274, "some", "いくつかの", "Part 1", "Week 7"],
+  [275, "any", "どれでも、何か", "Part 1", "Week 7"],
+  [276, "many", "多くの（可算名詞）", "Part 1", "Week 7"],
+  [277, "much", "多くの（不可算名詞）", "Part 1", "Week 7"],
+  [278, "a few ～", "少数の～", "Part 1", "Week 7"],
+  [279, "a little ～", "少量の～", "Part 1", "Week 7"],
+  [280, "a lot of ～", "たくさんの～", "Part 1", "Week 7"],
+  [281, "a piece of ～", "1つの～（切れ・枚）", "Part 1", "Week 7"],
+  [282, "a couple of ～", "2, 3の～、一組の", "Part 1", "Week 7"],
+  [283, "thousand", "千", "Part 1", "Week 7"],
+  [284, "thousands of ～", "何千もの～", "Part 1", "Week 7"],
+  [285, "（数字）percent", "～パーセント", "Part 1", "Week 7"],
+
+  // Part 1 - Week 8
+  [286, "all", "すべての", "Part 1", "Week 8"],
+  [287, "whole", "全体の、丸ごとの", "Part 1", "Week 8"],
+  [288, "have a ～ time", "～な時間を過ごす", "Part 1", "Week 8"],
+  [289, "spend", "（時間・お金）を費やす", "Part 1", "Week 8"],
+  [290, "waste", "～を無駄にする", "Part 1", "Week 8"],
+  [291, "put ～ off", "～を延期する", "Part 1", "Week 8"],
+  [292, "be going to do", "～する予定である", "Part 1", "Week 8"],
+  [293, "try", "～を試す、試みる", "Part 1", "Week 8"],
+  [294, "plan", "計画、～を計画する", "Part 1", "Week 8"],
+  [295, "carry ～ out", "～を実行する", "Part 1", "Week 8"],
+  [296, "behind schedule", "予定より遅れて", "Part 1", "Week 8"],
+  [297, "wait for ～", "～を待つ", "Part 1", "Week 8"],
+  [298, "keep （人） waiting", "（人）を待たせる", "Part 1", "Week 8"],
+  [299, "in time （for ～）", "（～に）間に合って", "Part 1", "Week 8"],
+  [300, "on time", "時間通りに", "Part 1", "Week 8"],
+  [301, "late", "遅れた、夜遅く", "Part 1", "Week 8"],
+  [302, "early", "早く、初期の", "Part 1", "Week 8"],
+  [303, "quickly", "速く、急いで", "Part 1", "Week 8"],
+  [304, "soon", "すぐに、まもなく", "Part 1", "Week 8"],
+  [305, "right away", "すぐに、直ちに", "Part 1", "Week 8"],
+  [306, "at once", "すぐに、一斉に", "Part 1", "Week 8"],
+  [307, "（期間） later", "（期間）後に", "Part 1", "Week 8"],
+  [308, "in （期間）", "（期間）経ったら、～以内で", "Part 1", "Week 8"],
+  [309, "at first", "最初は、初めのうち", "Part 1", "Week 8"],
+  [310, "for the first time", "初めて", "Part 1", "Week 8"],
+  [311, "in the end", "結局は、最後には", "Part 1", "Week 8"],
+  [312, "at last", "ついに、ようやく", "Part 1", "Week 8"],
+  [313, "after all", "結局のところ", "Part 1", "Week 8"],
+  [314, "first", "最初に、第一の", "Part 1", "Week 8"],
+  [315, "second", "第二の、次に", "Part 1", "Week 8"],
+  [316, "finally", "ついに、最後に", "Part 1", "Week 8"],
+  [317, "have been to ～", "～へ行ったことがある", "Part 1", "Week 8"],
+  [318, "ever", "これまでに", "Part 1", "Week 8"],
+  [319, "never", "一度も～ない", "Part 1", "Week 8"],
+  [320, "experience", "経験、～を経験する", "Part 1", "Week 8"],
+  [321, "already", "すでに、もう", "Part 1", "Week 8"],
+  [322, "yet", "（否定文で）まだ、（疑問文で）もう", "Part 1", "Week 8"],
+  [323, "still", "今でも、まだ", "Part 1", "Week 8"],
+  [324, "at 9 a.m.", "午前9時に", "Part 1", "Week 8"],
+  [325, "on February 14th", "2月14日に", "Part 1", "Week 8"],
+  [326, "on weekends", "週末に", "Part 1", "Week 8"],
+
+  // Part 1 - Week 9
+  [327, "every day", "毎日", "Part 1", "Week 9"],
+  [328, "one day", "ある日、いつか", "Part 1", "Week 9"],
+  [329, "these days", "最近では", "Part 1", "Week 9"],
+  [330, "the other day", "先日、この前", "Part 1", "Week 9"],
+  [331, "in 2020", "2020年に", "Part 1", "Week 9"],
+  [332, "last year", "昨年", "Part 1", "Week 9"],
+  [333, "time", "時間、回数", "Part 1", "Week 9"],
+  [334, "age", "年齢、時代", "Part 1", "Week 9"],
+  [335, "present", "現在、贈り物", "Part 1", "Week 9"],
+  [336, "past", "過去", "Part 1", "Week 9"],
+  [337, "future", "未来、将来", "Part 1", "Week 9"],
+  [338, "noon", "正午", "Part 1", "Week 9"],
+  [339, "all day", "一日中", "Part 1", "Week 9"],
+  [340, "all the way", "ずっと、途中でずっと", "Part 1", "Week 9"],
+  [341, "by", "～のそばに、～までに", "Part 1", "Week 9"],
+  [342, "until", "～までずっと", "Part 1", "Week 9"],
+  [343, "during", "～の間（期間）", "Part 1", "Week 9"],
+  [344, "while", "～する間に", "Part 1", "Week 9"],
+  [345, "since", "～以来", "Part 1", "Week 9"],
+  [346, "once", "かつて、一度", "Part 1", "Week 9"],
+  [347, "used to", "以前はよく～したものだ", "Part 1", "Week 9"],
+  [348, "not ～ anymore", "もはや～ない", "Part 1", "Week 9"],
+  [349, "no longer", "もはや～ない", "Part 1", "Week 9"],
+  [350, "here", "ここに", "Part 1", "Week 9"],
+  [351, "there", "そこに", "Part 1", "Week 9"],
+  [352, "outside", "外で、外部の", "Part 1", "Week 9"],
+  [353, "at home", "家で、くつろいで", "Part 1", "Week 9"],
+  [354, "between A and B", "AとBの間に", "Part 1", "Week 9"],
+  [355, "in front of ～", "～の前に", "Part 1", "Week 9"],
+  [356, "behind", "～の後ろに", "Part 1", "Week 9"],
+  [357, "next to ～", "～の隣に", "Part 1", "Week 9"],
+  [358, "far away from ～", "～から遠く離れて", "Part 1", "Week 9"],
+  [359, "near", "～の近くに", "Part 1", "Week 9"],
+  [360, "across from ～", "～の向かい側に", "Part 1", "Week 9"],
+  [361, "all over ～", "～中に、～の至る所で", "Part 1", "Week 9"],
+  [362, "out of ～", "～の中から外へ", "Part 1", "Week 9"],
+  [363, "together", "一緒に", "Part 1", "Week 9"],
+  [364, "without", "～なしで", "Part 1", "Week 9"],
+  [365, "alone", "一人で、単独で", "Part 1", "Week 9"],
+  [366, "reason", "理由", "Part 1", "Week 9"],
+  [367, "because", "なぜなら～だから", "Part 1", "Week 9"],
+
+  // Part 1 - Week 10
+  [368, "because of ～", "～の理由で、～のために", "Part 1", "Week 10"],
+  [369, "thanks to ～", "～のおかげで", "Part 1", "Week 10"],
+  [370, "way", "方法、道", "Part 1", "Week 10"],
+  [371, "how to do", "～する方法", "Part 1", "Week 10"],
+  [372, "in order to do", "～するために", "Part 1", "Week 10"],
+  [373, "by train", "電車で", "Part 1", "Week 10"],
+  [374, "with a pencil", "鉛筆で", "Part 1", "Week 10"],
+  [375, "on YouTube", "YouTubeで", "Part 1", "Week 10"],
+  [376, "online", "オンラインで", "Part 1", "Week 10"],
+  [377, "in English", "英語で", "Part 1", "Week 10"],
+  [378, "always", "いつも、常に", "Part 1", "Week 10"],
+  [379, "not ～ always", "いつも～とは限らない", "Part 1", "Week 10"],
+  [380, "usually", "たいてい、普通は", "Part 1", "Week 10"],
+  [381, "often", "しばしば、よく", "Part 1", "Week 10"],
+  [382, "sometimes", "時々", "Part 1", "Week 10"],
+  [383, "by chance", "偶然に", "Part 1", "Week 10"],
+  [384, "almost", "ほとんど", "Part 1", "Week 10"],
+  [385, "most", "大部分の、最も", "Part 1", "Week 10"],
+  [386, "least", "最も少ない", "Part 1", "Week 10"],
+  [387, "really", "本当に、とても", "Part 1", "Week 10"],
+  [388, "enough", "十分な", "Part 1", "Week 10"],
+  [389, "（比較級） than ～", "～よりも…", "Part 1", "Week 10"],
+  [390, "as ～ as ...", "…と同じくらい～", "Part 1", "Week 10"],
+  [391, "as ～ as S can", "できる限り～", "Part 1", "Week 10"],
+  [392, "not ～ at all", "全く～ない", "Part 1", "Week 10"],
+  [393, "too ～ （for A） to do", "（Aが）～しすぎて…できない", "Part 1", "Week 10"],
+  [394, "so", "とても、だから", "Part 1", "Week 10"],
+  [395, "such", "そのような", "Part 1", "Week 10"],
+  [396, "quite", "かなり、すっかり", "Part 1", "Week 10"],
+  [397, "could", "～することができた", "Part 1", "Week 10"],
+  [398, "should", "～すべきである", "Part 1", "Week 10"],
+  [399, "have to do", "～しなければならない", "Part 1", "Week 10"],
+  [400, "do one's best", "最善を尽くす", "Part 1", "Week 10"],
+
+  // Part 2 - Week 1
+  [401, "make", "～を作る、～にさせる", "Part 2", "Week 1"],
+  [402, "have", "～を持っている、～にさせる", "Part 2", "Week 1"],
+  [403, "let", "～させる、許す", "Part 2", "Week 1"],
+  [404, "explain", "～を説明する", "Part 2", "Week 1"],
+  [405, "describe", "～を描写する、説明する", "Part 2", "Week 1"],
+  [406, "communicate", "意思疎通する、伝える", "Part 2", "Week 1"],
+  [407, "express", "～を表現する", "Part 2", "Week 1"],
+  [408, "greet", "～にあいさつする", "Part 2", "Week 1"],
+  [409, "bow", "お辞儀をする", "Part 2", "Week 1"],
+  [410, "agree", "同意する", "Part 2", "Week 1"],
+  [411, "disagree", "意見が合わない", "Part 2", "Week 1"],
+  [412, "against", "～に反対して", "Part 2", "Week 1"],
+  [413, "be opposed to ～", "～に反対している", "Part 2", "Week 1"],
+  [414, "argue", "議論する、主張する", "Part 2", "Week 1"],
+  [415, "claim", "～を主張する", "Part 2", "Week 1"],
+  [416, "emphasize", "～を強調する", "Part 2", "Week 1"],
+  [417, "complain", "不平を言う", "Part 2", "Week 1"],
+  [418, "criticize", "～を批判する", "Part 2", "Week 1"],
+  [419, "discuss", "～について話し合う", "Part 2", "Week 1"],
+  [420, "debate", "討論する", "Part 2", "Week 1"],
+  [421, "aloud", "声に出して", "Part 2", "Week 1"],
+  [422, "thank", "～に感謝する", "Part 2", "Week 1"],
+  [423, "owe", "～に恩恵を受けている", "Part 2", "Week 1"],
+  [424, "grateful", "感謝している", "Part 2", "Week 1"],
+  [425, "excuse", "～を言い訳する、許す", "Part 2", "Week 1"],
+  [426, "forgive", "（人の罪など）を許す", "Part 2", "Week 1"],
+  [427, "apologize", "謝罪する", "Part 2", "Week 1"],
+  [428, "celebrate", "～を祝う", "Part 2", "Week 1"],
+  [429, "congratulate", "～にお祝いを言いたい", "Part 2", "Week 1"],
+  [430, "impress", "～に感銘を与える", "Part 2", "Week 1"],
+  [431, "admire", "～に感心する、称賛する", "Part 2", "Week 1"],
+  [432, "respect", "～を尊敬する", "Part 2", "Week 1"],
+  [433, "praise", "～をほめる", "Part 2", "Week 1"],
+  [434, "award", "賞、～を授与する", "Part 2", "Week 1"],
+  [435, "prize", "賞品、賞", "Part 2", "Week 1"],
+  [436, "reward", "報酬、～に報いる", "Part 2", "Week 1"],
+  [437, "reputation", "評判、名声", "Part 2", "Week 1"],
+  [438, "cheer", "～を励ます、歓声をあげる", "Part 2", "Week 1"],
+  [439, "support", "～を支持する、養う", "Part 2", "Week 1"],
+  [440, "recommend", "～を勧める", "Part 2", "Week 1"],
+
+  // Part 2 - Week 2
+  [441, "attend", "～に出席する", "Part 2", "Week 2"],
+  [442, "represent", "～を代表する", "Part 2", "Week 2"],
+  [443, "belong", "所属している", "Part 2", "Week 2"],
+  [444, "independent", "独立した", "Part 2", "Week 2"],
+  [445, "act", "行動する、演じる", "Part 2", "Week 2"],
+  [446, "pretend", "～のふりをする", "Part 2", "Week 2"],
+  [447, "behave", "振る舞う", "Part 2", "Week 2"],
+  [448, "tend", "～しがちである", "Part 2", "Week 2"],
+  [449, "bear", "～に耐える、抱く", "Part 2", "Week 2"],
+  [450, "obey", "～に従う", "Part 2", "Week 2"],
+  [451, "imitate", "～を模倣する", "Part 2", "Week 2"],
+  [452, "attitude", "態度、心構え", "Part 2", "Week 2"],
+  [453, "manner", "方法、マナー", "Part 2", "Week 2"],
+  [454, "allow", "～を許可する", "Part 2", "Week 2"],
+  [455, "admit", "～を認める", "Part 2", "Week 2"],
+  [456, "accept", "～を受け入れる", "Part 2", "Week 2"],
+  [457, "take ～ for granted", "～を当然のこととみなす", "Part 2", "Week 2"],
+  [458, "natural", "自然の、当然の", "Part 2", "Week 2"],
+  [459, "seem", "～のように思われる", "Part 2", "Week 2"],
+  [460, "consider", "～をよく考える、みなす", "Part 2", "Week 2"],
+  [461, "regard", "～をみなす", "Part 2", "Week 2"],
+  [462, "interpret", "～を解釈する、通訳する", "Part 2", "Week 2"],
+  [463, "imagine", "～を想像する", "Part 2", "Week 2"],
+  [464, "guess", "～を推測する", "Part 2", "Week 2"],
+  [465, "expect", "～を予期する、期待する", "Part 2", "Week 2"],
+  [466, "predict", "～を予測する", "Part 2", "Week 2"],
+  [467, "estimate", "～を見積もる", "Part 2", "Week 2"],
+  [468, "recognize", "～を認識する、認める", "Part 2", "Week 2"],
+  [469, "realize", "～を悟る、実現する", "Part 2", "Week 2"],
+  [470, "appreciate", "～を正しく評価する、感謝する", "Part 2", "Week 2"],
+  [471, "aware", "気づいている", "Part 2", "Week 2"],
+  [472, "concerned", "心配している、関係している", "Part 2", "Week 2"],
+  [473, "wonder", "～かしらと思う", "Part 2", "Week 2"],
+  [474, "doubt", "～を疑う", "Part 2", "Week 2"],
+  [475, "judge", "～を判断する、裁判官", "Part 2", "Week 2"],
+  [476, "compare", "～を比較する", "Part 2", "Week 2"],
+  [477, "determine", "～を決定する、決意する", "Part 2", "Week 2"],
+  [478, "attention", "注意、注目", "Part 2", "Week 2"],
+  [479, "concentrate", "集中する", "Part 2", "Week 2"],
+  [480, "focus", "焦点、～を集中させる", "Part 2", "Week 2"]
+];
+
+// --- グローバル状態 ---
+let selectedVocabulary = [];
+let quizMode = "eng_to_jap"; // "eng_to_jap" または "jap_to_eng"
+let currentQuestionIndex = 0;
+let currentQuestion = null;
+let timer = 60;
+let timerInterval = null;
+let score = 0;
+let combo = 0;
+let maxCombo = 0;
+let totalAnswered = 0;
+let totalCorrect = 0;
+let wrongList = [];
+let questionStartTime = 0;
+
+// DOM要素
+const startScreen = document.getElementById('start-screen');
+const quizScreen = document.getElementById('quiz-screen');
+const resultScreen = document.getElementById('result-screen');
+
+const modeSelect = document.getElementById('mode-select');
+const partSelect = document.getElementById('part-select');
+const weekSelect = document.getElementById('week-select');
+const startBtn = document.getElementById('start-btn');
+
+const timerEl = document.getElementById('timer');
+const scoreEl = document.getElementById('score');
+const comboEl = document.getElementById('combo');
+const timerBar = document.getElementById('timer-bar');
+
+const wordNumEl = document.getElementById('word-num');
+const wordTextEl = document.getElementById('word-text');
+const optionsContainer = document.getElementById('options-container');
+
+// 初期化（ドロップダウン生成）
+function initSelects() {
+  const parts = ["すべて", ...new Set(rawVocabularyData.map(item => item[3]))];
+  partSelect.innerHTML = parts.map(p => `<option value="${p}">${p}</option>`).join('');
+  
+  updateWeekSelect();
+  partSelect.addEventListener('change', updateWeekSelect);
+}
+
+function updateWeekSelect() {
+  const selectedPart = partSelect.value;
+  let weeks = [];
+  if (selectedPart === "すべて") {
+    weeks = [...new Set(rawVocabularyData.map(item => item[4]))];
+  } else {
+    weeks = [...new Set(rawVocabularyData.filter(item => item[3] === selectedPart).map(item => item[4]))];
+  }
+
+  weeks.sort((a, b) => {
+    const numA = parseInt(a.replace('Week ', ''));
+    const numB = parseInt(b.replace('Week ', ''));
+    return numA - numB;
+  });
+
+  let options = '<option value="すべて">すべてのWeek</option>';
+  weeks.forEach(w => {
+    options += `<option value="${w}">${w}</option>`;
+  });
+  weekSelect.innerHTML = options;
+}
+
+// テスト開始
+startBtn.addEventListener('click', () => {
+  quizMode = modeSelect.value;
+  const pVal = partSelect.value;
+  const wVal = weekSelect.value;
+
+  selectedVocabulary = rawVocabularyData.filter(item => {
+    const matchPart = (pVal === "すべて" || item[3] === pVal);
+    const matchWeek = (wVal === "すべて" || item[4] === wVal);
+    return matchPart && matchWeek;
+  });
+
+  if (selectedVocabulary.length < 4) {
+    alert("選択された範囲の単語数が少なすぎます（4語以上必要です）。");
+    return;
+  }
+
+  shuffleArray(selectedVocabulary);
+
+  // 状態リセット
+  timer = 60;
+  score = 0;
+  combo = 0;
+  maxCombo = 0;
+  totalAnswered = 0;
+  totalCorrect = 0;
+  wrongList = [];
+  currentQuestionIndex = 0;
+
+  // UI切り替え
+  startScreen.classList.add('hidden');
+  resultScreen.classList.add('hidden');
+  quizScreen.classList.remove('hidden');
+
+  scoreEl.textContent = score;
+  comboEl.textContent = combo;
+  timerEl.textContent = timer;
+  timerBar.style.width = '100%';
+
+  startTimer();
+  nextQuestion();
+});
+
+// タイマー
+function startTimer() {
+  const startTime = Date.now();
+  const totalDuration = 60000; // 60秒
+
+  timerInterval = setInterval(() => {
+    const elapsed = Date.now() - startTime;
+    const remaining = Math.max(0, totalDuration - elapsed);
+    
+    timer = Math.ceil(remaining / 1000);
+    timerEl.textContent = timer;
+
+    const percentage = (remaining / totalDuration) * 100;
+    timerBar.style.width = percentage + '%';
+
+    if (remaining <= 0) {
+      clearInterval(timerInterval);
+      endQuiz();
+    }
+  }, 200);
+}
+
+// 問題セット
+function nextQuestion() {
+  if (currentQuestionIndex >= selectedVocabulary.length) {
+    shuffleArray(selectedVocabulary);
+    currentQuestionIndex = 0;
+  }
+
+  currentQuestion = selectedVocabulary[currentQuestionIndex];
+  currentQuestionIndex++;
+
+  wordNumEl.textContent = `No. ${currentQuestion[0]} (${currentQuestion[3]} ${currentQuestion[4]})`;
+
+  // モード別問題・解答設定
+  const questionPrompt = (quizMode === "eng_to_jap") ? currentQuestion[1] : currentQuestion[2];
+  const correctAnswer = (quizMode === "eng_to_jap") ? currentQuestion[2] : currentQuestion[1];
+
+  wordTextEl.textContent = questionPrompt;
+
+  // 選択肢作成 (正解1つ + 実在する他の単語からダミー3つ)
+  const options = [correctAnswer];
+  const targetIndex = (quizMode === "eng_to_jap") ? 2 : 1;
+  const otherWords = rawVocabularyData.filter(item => item[targetIndex] !== correctAnswer);
+  shuffleArray(otherWords);
+
+  for (let i = 0; i < 3; i++) {
+    options.push(otherWords[i][targetIndex]);
+  }
+  shuffleArray(options);
+
+  optionsContainer.innerHTML = '';
+  options.forEach(optText => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = optText;
+    btn.addEventListener('click', () => handleAnswer(btn, optText, correctAnswer));
+    optionsContainer.appendChild(btn);
+  });
+
+  questionStartTime = Date.now();
+}
+
+// 解答処理
+function handleAnswer(selectedBtn, selectedText, correctAnswer) {
+  const buttons = optionsContainer.querySelectorAll('.option-btn');
+  buttons.forEach(b => b.style.pointerEvents = 'none');
+
+  const isCorrect = (selectedText === correctAnswer);
+  const timeTaken = (Date.now() - questionStartTime) / 1000;
+
+  totalAnswered++;
+
+  if (isCorrect) {
+    totalCorrect++;
+    combo++;
+    if (combo > maxCombo) maxCombo = combo;
+
+    selectedBtn.classList.add('correct');
+
+    const speedBonus = Math.max(0, Math.round((5 - timeTaken) * 100)); 
+    const comboMultiplier = Math.min(2.0, 1.0 + (combo - 1) * 0.1);
+    const addedScore = Math.round((500 + speedBonus) * comboMultiplier);
+
+    score += addedScore;
+  } else {
+    combo = 0;
+    selectedBtn.classList.add('wrong');
+    
+    buttons.forEach(b => {
+      if (b.textContent === correctAnswer) {
+        b.classList.add('correct');
+      }
+    });
+
+    if (!wrongList.some(item => item[0] === currentQuestion[0])) {
+      wrongList.push(currentQuestion);
+    }
+  }
+
+  scoreEl.textContent = score;
+  comboEl.textContent = combo;
+
+  setTimeout(() => {
+    nextQuestion();
+  }, isCorrect ? 250 : 800);
+}
+
+// クイズ終了
+function endQuiz() {
+  quizScreen.classList.add('hidden');
+  resultScreen.classList.remove('hidden');
+
+  document.getElementById('final-score').textContent = score.toLocaleString();
+  document.getElementById('stat-correct').textContent = `${totalCorrect} / ${totalAnswered}`;
+  
+  const accuracy = totalAnswered > 0 ? Math.round((totalCorrect / totalAnswered) * 100) : 0;
+  document.getElementById('stat-accuracy').textContent = `${accuracy}%`;
+  document.getElementById('stat-maxcombo').textContent = maxCombo;
+
+  const reviewContainer = document.getElementById('review-container');
+  const reviewList = document.getElementById('review-list');
+  
+  if (wrongList.length > 0) {
+    reviewContainer.classList.remove('hidden');
+    reviewList.innerHTML = wrongList.map(item => `
+      <div class="review-item">
+        <span class="review-word">${item[1]}</span>
+        <span class="review-meaning">${item[2]}</span>
+      </div>
+    `).join('');
+  } else {
+    reviewContainer.classList.add('hidden');
+  }
+}
+
+// 再挑戦ボタン
+document.getElementById('restart-btn').addEventListener('click', () => {
+  resultScreen.classList.add('hidden');
+  startScreen.classList.remove('hidden');
+});
+
+// 配列シャッフル関数
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+// 初期化実行
+initSelects();
+</script>
+
+</body>
+</html>
