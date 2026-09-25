@@ -109,6 +109,11 @@
 
     .score-box {
       color: var(--primary);
+      transition: color 0.3s;
+    }
+
+    .score-box.minus {
+      color: var(--wrong);
     }
 
     .combo-box {
@@ -294,7 +299,7 @@
     <div class="quiz-header">
       <div class="timer-box">⏱ <span id="timer">60</span>s</div>
       <div class="combo-box"><span id="combo">0</span> Combo</div>
-      <div class="score-box"><span id="score">0</span> pt</div>
+      <div class="score-box" id="score-box"><span id="score">0</span> pt</div>
     </div>
     
     <div class="progress-bar-bg">
@@ -855,7 +860,7 @@ const rawVocabularyData = [
 
 // --- グローバル状態 ---
 let selectedVocabulary = [];
-let quizMode = "eng_to_jap"; // "eng_to_jap" または "jap_to_eng"
+let quizMode = "eng_to_jap";
 let currentQuestionIndex = 0;
 let currentQuestion = null;
 let timer = 60;
@@ -879,6 +884,7 @@ const weekSelect = document.getElementById('week-select');
 const startBtn = document.getElementById('start-btn');
 
 const timerEl = document.getElementById('timer');
+const scoreBoxEl = document.getElementById('score-box');
 const scoreEl = document.getElementById('score');
 const comboEl = document.getElementById('combo');
 const timerBar = document.getElementById('timer-bar');
@@ -995,13 +1001,11 @@ function nextQuestion() {
 
   wordNumEl.textContent = `No. ${currentQuestion[0]} (${currentQuestion[3]} ${currentQuestion[4]})`;
 
-  // モード別問題・解答設定
   const questionPrompt = (quizMode === "eng_to_jap") ? currentQuestion[1] : currentQuestion[2];
   const correctAnswer = (quizMode === "eng_to_jap") ? currentQuestion[2] : currentQuestion[1];
 
   wordTextEl.textContent = questionPrompt;
 
-  // 選択肢作成 (正解1つ + 実在する他の単語からダミー3つ)
   const options = [correctAnswer];
   const targetIndex = (quizMode === "eng_to_jap") ? 2 : 1;
   const otherWords = rawVocabularyData.filter(item => item[targetIndex] !== correctAnswer);
@@ -1050,6 +1054,16 @@ function handleAnswer(selectedBtn, selectedText, correctAnswer) {
     combo = 0;
     selectedBtn.classList.add('wrong');
     
+    // 【減点ロジック追加】不正解で -300 pt（ただし 0 pt 未満にはならない）
+    const penalty = 300;
+    score = Math.max(0, score - penalty);
+
+    // 減点演出（スコア表示を一時的に赤くする）
+    scoreBoxEl.classList.add('minus');
+    setTimeout(() => {
+      scoreBoxEl.classList.remove('minus');
+    }, 500);
+
     buttons.forEach(b => {
       if (b.textContent === correctAnswer) {
         b.classList.add('correct');
